@@ -109,14 +109,23 @@ coin-flip each time (no anti-repeat), purely client-side.
 ## Sharing a specific announcement
 
 Hit **SHARE** below the controls to copy a link to whatever announcement
-is currently on screen. The link just carries the exact line as a query
-param (`?say=...`) — no server, no database, no lookup involved, so it
-never breaks even if you later edit or reorder `announcements.txt`.
+is currently on screen. The link just carries its line number (e.g.
+`?say=9260`, matching the "Announcement #9260 of 10000" shown in DEBUG) —
+no server, no database, just an index into `announcements.txt`.
 
 Opening a share link shows that exact line immediately, paused (so it
 won't get replaced by the timer), with the link stripped from the address
 bar right away. Hit **RESUME** to fold back into the normal rotation, or
 **NEXT** to jump straight to a fresh random one.
+
+Because it's a line number, a link stays valid as long as you only ever
+*append* new lines to `announcements.txt`. If you insert, delete, or
+reorder lines in the middle of the file, old links can end up pointing at
+a different announcement than the one that was shared — an out-of-range
+number (e.g. the file got shorter) falls back to a fresh random
+announcement instead of erroring, but a link that now points at some
+*other* line has no way to detect that. If that matters to you, prefer
+appending new material to the end of the file.
 
 ## Debug / diagnostics
 

@@ -68,25 +68,27 @@
   }
 
   /**
-   * Pick a random line that isn't in recent history, rerolling up to
-   * maxAttempts times before gracefully accepting a repeat (so a short
-   * list, or a history size close to the list length, never hangs).
+   * Pick the index of a random line that isn't in recent history,
+   * rerolling up to maxAttempts times before gracefully accepting a
+   * repeat (so a short list, or a history size close to the list
+   * length, never hangs). Returns an index (not the text) because the
+   * index doubles as a short, stable share-link id for a static list.
    */
   function pickNext(lines, historyManager, maxAttempts) {
     maxAttempts = maxAttempts || 50;
     if (lines.length === 1) {
-      historyManager.add(lines[0]);
-      return lines[0];
+      historyManager.add(0);
+      return 0;
     }
 
-    let choice = lines[Math.floor(Math.random() * lines.length)];
+    let index = Math.floor(Math.random() * lines.length);
     let attempt = 0;
-    while (historyManager.has(choice) && attempt < maxAttempts) {
-      choice = lines[Math.floor(Math.random() * lines.length)];
+    while (historyManager.has(index) && attempt < maxAttempts) {
+      index = Math.floor(Math.random() * lines.length);
       attempt++;
     }
-    historyManager.add(choice);
-    return choice;
+    historyManager.add(index);
+    return index;
   }
 
   global.WardogsLines = { load, pickNext };

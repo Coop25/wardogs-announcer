@@ -22,7 +22,7 @@
   let historyManager = null;
 
   let sessionGenerated = 0;
-  let currentAnnouncementText = ''; // whatever's currently on screen
+  let currentIndex = null; // index into `lines` of whatever's currently on screen
   let remainingSeconds = settings.rotationSeconds;
   let totalSeconds = settings.rotationSeconds;
   let timerId = null;
@@ -71,14 +71,15 @@
   }
 
   function showNextAnnouncement() {
-    const text = window.WardogsLines.pickNext(lines, historyManager);
-    display(text);
+    const index = window.WardogsLines.pickNext(lines, historyManager);
+    display(index);
   }
 
-  function display(text) {
-    currentAnnouncementText = text;
+  function display(index) {
+    currentIndex = index;
     sessionGenerated++;
 
+    const text = lines[index];
     els.announcementText.classList.remove('fade-in');
     // Force reflow so the transition re-triggers on repeated generations.
     void els.announcementText.offsetWidth;
@@ -88,8 +89,7 @@
 
     els.statusGenerated.textContent = `Generated this session: ${sessionGenerated}`;
     els.statusHistory.textContent = `Recent history: ${historyManager.size}/${historyManager.maxSize}`;
-    const index = lines.indexOf(text);
-    els.debugLine.textContent = index >= 0 ? `Announcement #${index + 1} of ${lines.length}` : 'Shared announcement (not in the current list)';
+    els.debugLine.textContent = `Announcement #${index + 1} of ${lines.length}`;
   }
 
   /** Randomly (re-)assign a team, in sync with every new announcement shown. */
@@ -164,17 +164,17 @@
 
   // ---------- Share links ----------
 
-  function buildShareUrl(text) {
+  function buildShareUrl(index) {
     const url = new URL(window.location.href);
     url.search = '';
     url.hash = '';
-    url.searchParams.set(SHARE_PARAM, text);
+    url.searchParams.set(SHARE_PARAM, String(index + 1)); // 1-based, matches the on-screen "Announcement #N"
     return url.toString();
   }
 
   async function shareCurrentAnnouncement() {
-    if (!currentAnnouncementText) return;
-    const url = buildShareUrl(currentAnnouncementText);
+    if (currentIndex === null) return;
+    const url = buildShareUrl(currentIndex);
 
     // Show + select the link first so the execCommand fallback below has a
     // visible, focused field to copy from if the async Clipboard API fails.
@@ -295,10 +295,10 @@
     let immediateRepeats = 0;
     let last = null;
     for (let i = 0; i < count; i++) {
-      const line = window.WardogsLines.pickNext(lines, boundedHistory);
-      if (line === last) immediateRepeats++;
-      seen.add(line);
-      last = line;
+      const index = window.WardogsLines.pickNext(lines, boundedHistory);
+      if (index === last) immediateRepeats++;
+      seen.add(index);
+      last = index;
     }
     const stats = { draws: count, totalLines: lines.length, uniqueSeen: seen.size, immediateRepeats };
     console.log('[WARDOGS testAntiRepeat]', stats);
@@ -325,16 +325,26 @@
     wireEvents();
 
     const params = new URLSearchParams(window.location.search);
-    const sharedText = params.get(SHARE_PARAM);
+    const sharedParam = params.get(SHARE_PARAM);
+    const sharedIndex = sharedParam !== null ? parseInt(sharedParam, 10) - 1 : NaN;
+    const sharedIndexValid = Number.isInteger(sharedIndex) && sharedIndex >= 0 && sharedIndex < lines.length;
 
     resetTimer();
-    if (sharedText) {
+    if (sharedParam !== null) {
       // Strip the param immediately so a reload later starts a normal
-      // rotation instead of re-showing the same shared line forever.
+      // rotation instead of re-showing the same shared announcement forever.
       window.history.replaceState({}, '', window.location.pathname + window.location.hash);
-      display(sharedText);
-      pause(); // keep the shared line on screen until the user moves on
+    }
+    if (sharedIndexValid) {
+      display(sharedIndex);
+      pause(); // keep the shared announcement on screen until the user moves on
     } else {
+      if (sharedParam !== null) {
+        console.warn(
+          `[WARDOGS] Share link pointed to announcement #${sharedParam}, which is out of range for the ` +
+            `current list of ${lines.length}. Falling back to a fresh announcement.`
+        );
+      }
       showNextAnnouncement();
       startTimer();
     }
