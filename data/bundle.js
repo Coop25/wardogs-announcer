@@ -63,20 +63,20 @@ window.WARDOGS_DATA = {
     "id": "long_flight_001",
     "weight": 1,
     "length": "long",
-    "template": "{{OPENING}} {{WELCOME}} {{FLIGHT_TIME}} {{SAFETY_WARNING}} {{DESTINATION}} {{CLOSING}}"
+    "template": "{{OPENING}} {{FLIGHT_TIME}} {{SAFETY_WARNING}} {{CLOSING}}"
   },
   {
     "id": "long_full_001",
     "weight": 1,
     "length": "long",
-    "template": "{{CAPTAIN_INTRO}} {{WELCOME}} {{DESTINATION}} {{PILOT_JOKE}} {{SAFETY_WARNING}} {{CLOSING}}"
+    "template": "{{CAPTAIN_INTRO}} {{WELCOME}} {{PILOT_JOKE}} {{CLOSING}}"
   },
   {
     "id": "long_time_001",
     "weight": 1,
     "length": "long",
     "timeAware": true,
-    "template": "{{GREETING}}, passengers, and welcome aboard. {{TIME_COMMENT}} {{WEATHER_INTRO}} {{COMBAT_WEATHER}} {{CLOSING}}"
+    "template": "{{GREETING}}, passengers, and welcome aboard. {{TIME_COMMENT}} {{COMBAT_WEATHER}} {{CLOSING}}"
   }
 ],
   "phrases": [

@@ -207,6 +207,7 @@
   }
 
   function applySettingsFromForm() {
+    const previousRotationSeconds = settings.rotationSeconds;
     const minutes = parseFloat(els.settingRotationMinutes.value);
     settings.rotationSeconds = Number.isFinite(minutes) && minutes > 0 ? Math.round(minutes * 60) : DEFAULT_SETTINGS.rotationSeconds;
 
@@ -228,6 +229,12 @@
 
     saveSettings();
     els.statusHistory.textContent = `Recent history: ${historyManager.size}/${historyManager.maxSize}`;
+
+    // Apply a changed rotation interval immediately instead of waiting for
+    // the current countdown to finish on its own.
+    if (settings.rotationSeconds !== previousRotationSeconds) {
+      resetTimer();
+    }
   }
 
   function resetSettings() {
