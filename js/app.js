@@ -28,6 +28,7 @@
   let sessionGenerated = 0;
   let current = null; // last generate() result
   let currentAnnouncementText = ''; // whatever text is currently on screen, generated or shared
+  let currentShareCode = ''; // compact "templateId~id,id,id" code for whatever's on screen
   let remainingSeconds = settings.rotationSeconds;
   let totalSeconds = settings.rotationSeconds;
   let timerId = null;
@@ -100,6 +101,7 @@
     }
     sessionGenerated++;
     currentAnnouncementText = current.text;
+    currentShareCode = window.WardogsGenerator.buildShareCode(current.template.id, current.usedPhrases);
 
     renderAnnouncementText(current.text);
 
@@ -128,14 +130,31 @@
     els.announcementText.classList.add('fade-in');
   }
 
-  /** Show a specific announcement text that came in via a share link, bypassing the generator. */
-  function displaySharedAnnouncement(text) {
+  /**
+   * Reconstruct and show the exact announcement a share code points to
+   * (templateId + ordered phrase ids), bypassing random generation.
+   */
+  function displaySharedFromCode(code) {
+    const { templateId, ids } = window.WardogsGenerator.parseShareCode(code);
+    const ctx = window.WardogsTimeContext.getTimeContext();
+    const result = window.WardogsGenerator.renderFromIds(templateId, ids, dataset, ctx);
+
+    if (!result.ok) {
+      // A missing template/phrase (content edited or removed since the link
+      // was shared) would otherwise render a mangled, half-empty sentence —
+      // better to fall back to a normal fresh announcement than show that.
+      console.warn('[WARDOGS] Share link could not be fully reconstructed (content may have changed since it was shared). Falling back to a fresh announcement.', result);
+      generateAndDisplay('shared-link-fallback');
+      return;
+    }
+
     current = null;
-    currentAnnouncementText = text;
-    renderAnnouncementText(text);
+    currentAnnouncementText = result.text;
+    currentShareCode = code;
+    renderAnnouncementText(result.text);
 
     els.statusContext.textContent = 'Current context: shared announcement';
-    els.debugTemplate.textContent = 'Shared announcement (opened from a share link)';
+    els.debugTemplate.textContent = `Shared announcement: ${templateId}`;
     els.debugLength.textContent = '';
     els.debugTimeAware.textContent = '';
     els.debugSignature.textContent = '';
@@ -205,17 +224,17 @@
 
   // ---------- Share links ----------
 
-  function buildShareUrl(text) {
+  function buildShareUrl(code) {
     const url = new URL(window.location.href);
     url.search = '';
     url.hash = '';
-    url.searchParams.set(SHARE_PARAM, text);
+    url.searchParams.set(SHARE_PARAM, code);
     return url.toString();
   }
 
   async function shareCurrentAnnouncement() {
-    if (!currentAnnouncementText) return;
-    const url = buildShareUrl(currentAnnouncementText);
+    if (!currentShareCode) return;
+    const url = buildShareUrl(currentShareCode);
 
     // Show + select the link first so the execCommand fallback below has a
     // visible, focused field to copy from if the async Clipboard API fails.
@@ -374,14 +393,14 @@
     wireEvents();
 
     const params = new URLSearchParams(window.location.search);
-    const sharedText = params.get(SHARE_PARAM);
+    const shareCode = params.get(SHARE_PARAM);
 
     resetTimer();
-    if (sharedText) {
+    if (shareCode) {
       // Strip the param immediately so a reload later starts a normal
       // rotation instead of re-showing the same shared line forever.
       window.history.replaceState({}, '', window.location.pathname + window.location.hash);
-      displaySharedAnnouncement(sharedText);
+      displaySharedFromCode(shareCode);
       pause(); // keep the shared line on screen until the user moves on
     } else {
       generateAndDisplay('init');

@@ -155,6 +155,71 @@
     return `${templateId}|${usedPhrases.map((p) => `${p.category}:${p.id}`).join('|')}`;
   }
 
+  /** Compact code for share links: templateId + ordered phrase ids, e.g. "standard_flight_001~opening_002,welcome_006". */
+  function buildShareCode(templateId, usedPhrases) {
+    return `${templateId}~${usedPhrases.map((p) => p.id).join(',')}`;
+  }
+
+  function parseShareCode(code) {
+    const [templateId, idsPart] = String(code || '').split('~');
+    const ids = idsPart ? idsPart.split(',').filter(Boolean) : [];
+    return { templateId, ids };
+  }
+
+  function flattenPhrasesById(categories) {
+    const byId = new Map();
+    Object.values(categories).forEach((list) => list.forEach((p) => byId.set(p.id, p)));
+    return byId;
+  }
+
+  /**
+   * Deterministically re-render a specific announcement from its template
+   * id + the exact ordered list of phrase ids used to fill it (instead of
+   * picking randomly), so a share link only needs a short code instead of
+   * the full announcement text.
+   */
+  function renderFromIds(templateId, ids, dataset, ctx) {
+    const template = dataset.templates.find((t) => t.id === templateId);
+    if (!template) {
+      return { ok: false, text: '', reason: `unknown template "${templateId}"`, usedPhrases: [] };
+    }
+
+    const state = {
+      ctx,
+      idQueue: ids.slice(),
+      phraseById: flattenPhrasesById(dataset.categories),
+      usedPhrases: [],
+      missing: []
+    };
+    const rawText = resolveStringFromIds(template.template, state, 0);
+    const text = normalizeText(rawText);
+
+    return {
+      ok: state.missing.length === 0 && state.idQueue.length === 0 && text.length > 0,
+      text,
+      template,
+      usedPhrases: state.usedPhrases,
+      missing: state.missing
+    };
+  }
+
+  function resolveStringFromIds(str, state, depth) {
+    if (depth > MAX_RESOLVE_DEPTH) return str;
+    return str.replace(PLACEHOLDER_RE, (full, name) => {
+      if (COMPUTED_VARS.has(name)) {
+        return resolveComputedVar(name, state.ctx);
+      }
+      const nextId = state.idQueue.shift();
+      const phrase = nextId !== undefined ? state.phraseById.get(nextId) : undefined;
+      if (!phrase) {
+        state.missing.push(nextId ?? `(missing id for {{${name}}})`);
+        return '';
+      }
+      state.usedPhrases.push({ category: phrase.category, id: phrase.id });
+      return resolveStringFromIds(phrase.text, state, depth + 1);
+    });
+  }
+
   function assembleAnnouncement(template, dataset, ctx, settings, forceAnyOnly) {
     const state = {
       dataset,
@@ -305,6 +370,9 @@
     testGenerator,
     normalizeText,
     buildSignature,
-    placeholderToCategory
+    placeholderToCategory,
+    buildShareCode,
+    parseShareCode,
+    renderFromIds
   };
 })(typeof window !== 'undefined' ? window : globalThis);

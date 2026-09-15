@@ -221,14 +221,25 @@ offending entry is skipped rather than crashing the app.
 ## Sharing a specific announcement
 
 Hit **SHARE** below the controls to copy a link to whatever announcement is
-currently on screen. The exact text is embedded in the URL itself (e.g.
-`?say=...`) — there's no server or database involved, so it works the same
-whether you're running locally or on GitHub Pages.
+currently on screen. Rather than embedding the whole sentence, the URL
+carries a short code — the template id plus the ordered list of phrase ids
+that filled it in, e.g. `?say=standard_flight_001~opening_002,welcome_006,
+destination_002,closing_004` — usually 30-90 characters instead of the
+200-350 a full announcement would take. There's no server or database
+involved; opening the link deterministically re-assembles the exact same
+text from `content.json`, so it works the same locally or on GitHub Pages.
 
 Opening a share link shows that exact line immediately, paused (so it won't
 get replaced by the timer), with the link stripped from the address bar
 right away. Hit **RESUME** to fold back into the normal rotation, or
 **NEXT** to jump straight to a fresh random one.
+
+Because the link references phrase/template *ids*, it depends on those ids
+still existing in `content.json` — if you later delete or rename an id a
+link pointed to, opening that old link just falls back to a fresh random
+announcement instead of showing broken text (with a note in the console).
+Editing a phrase's `text` in place, or adding new phrases/templates, never
+breaks existing links.
 
 ## Settings
 
