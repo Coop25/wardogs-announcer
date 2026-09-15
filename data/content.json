@@ -1,0 +1,696 @@
+﻿{
+  "templates": [
+  {
+    "id": "short_greeting_001",
+    "weight": 1,
+    "length": "short",
+    "timeAware": true,
+    "template": "{{GREETING}}, passengers. {{CLOSING}}"
+  },
+  {
+    "id": "short_weather_001",
+    "weight": 1,
+    "length": "short",
+    "template": "{{WEATHER_INTRO}} {{COMBAT_WEATHER}}"
+  },
+  {
+    "id": "short_opening_001",
+    "weight": 1,
+    "length": "short",
+    "template": "{{OPENING}} {{DESTINATION}}"
+  },
+  {
+    "id": "short_landing_001",
+    "weight": 1,
+    "length": "short",
+    "template": "{{LANDING_WARNING}}"
+  },
+  {
+    "id": "standard_flight_001",
+    "weight": 2,
+    "length": "medium",
+    "template": "{{OPENING}} {{WELCOME}} {{DESTINATION}} {{CLOSING}}"
+  },
+  {
+    "id": "safety_001",
+    "weight": 1,
+    "length": "medium",
+    "template": "{{CAPTAIN_INTRO}} {{SAFETY_WARNING}} {{PILOT_JOKE}}"
+  },
+  {
+    "id": "landing_briefing_001",
+    "weight": 1,
+    "length": "medium",
+    "template": "{{CAPTAIN_INTRO}} {{LANDING_WARNING}} {{CLOSING}}"
+  },
+  {
+    "id": "takeoff_briefing_001",
+    "weight": 1,
+    "length": "medium",
+    "template": "{{TAKEOFF_LINE}} {{PASSENGER_JOKE}} {{DESTINATION}}"
+  },
+  {
+    "id": "time_flavor_001",
+    "weight": 1,
+    "length": "medium",
+    "timeAware": true,
+    "template": "{{GREETING}}, passengers. {{WELCOME}} {{TIME_COMMENT}}"
+  },
+  {
+    "id": "long_flight_001",
+    "weight": 1,
+    "length": "long",
+    "template": "{{OPENING}} {{WELCOME}} {{FLIGHT_TIME}} {{SAFETY_WARNING}} {{DESTINATION}} {{CLOSING}}"
+  },
+  {
+    "id": "long_full_001",
+    "weight": 1,
+    "length": "long",
+    "template": "{{CAPTAIN_INTRO}} {{WELCOME}} {{DESTINATION}} {{PILOT_JOKE}} {{SAFETY_WARNING}} {{CLOSING}}"
+  },
+  {
+    "id": "long_time_001",
+    "weight": 1,
+    "length": "long",
+    "timeAware": true,
+    "template": "{{GREETING}}, passengers, and welcome aboard. {{TIME_COMMENT}} {{WEATHER_INTRO}} {{COMBAT_WEATHER}} {{CLOSING}}"
+  }
+],
+  "phrases": [
+{
+    "id": "opening_001",
+    "category": "opening",
+    "text": "Ladies and gentlemen, welcome aboard Cooper Air.",
+    "styles": ["airline", "professional"],
+    "contexts": ["any"],
+    "weight": 2,
+    "tags": ["formal"]
+  },
+  {
+    "id": "opening_002",
+    "category": "opening",
+    "text": "Good day, passengers. This is your pilot speaking, for reasons that remain unclear to management.",
+    "styles": ["unprofessional", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1,
+    "tags": ["casual"]
+  },
+  {
+    "id": "opening_003",
+    "category": "opening",
+    "text": "Attention all personnel, this is your flight crew.",
+    "styles": ["military", "professional"],
+    "contexts": ["any"],
+    "weight": 1,
+    "tags": ["formal"]
+  },
+  {
+    "id": "opening_004",
+    "category": "opening",
+    "text": "Thanks for flying with us today, whether you meant to or not.",
+    "styles": ["budget", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1,
+    "tags": ["casual"]
+  },
+  {
+    "id": "opening_005",
+    "category": "opening",
+    "text": "On behalf of the entire crew, and by entire crew I mean me, welcome aboard.",
+    "styles": ["unprofessional", "exhausted"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "opening_006",
+    "category": "opening",
+    "text": "Greetings, valued cargo. I mean passengers.",
+    "styles": ["corporate", "deadpan", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "opening_007",
+    "category": "opening",
+    "text": "Welcome aboard. Please note that all statements made during this flight are non-binding.",
+    "styles": ["legal", "corporate", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "opening_008",
+    "category": "opening",
+    "text": "Hello and welcome. I'm required to sound confident, so here goes.",
+    "styles": ["overconfident", "unprofessional"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "welcome_001",
+    "category": "welcome",
+    "text": "We'll be providing nonstop service directly into somebody else's problem.",
+    "styles": ["deadpan", "military", "absurd"],
+    "contexts": ["any"],
+    "weight": 2
+  },
+  {
+    "id": "welcome_002",
+    "category": "welcome",
+    "text": "Thank you for choosing Budget Air Assault, where the seatbelts are optional and so is the plan.",
+    "styles": ["budget", "unprofessional"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "welcome_003",
+    "category": "welcome",
+    "text": "Today's flight is fully insured, in the sense that someone, somewhere, has insurance.",
+    "styles": ["legal", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "welcome_004",
+    "category": "welcome",
+    "text": "We are proud to offer premium transport to the exact same landing zones everyone else is avoiding.",
+    "styles": ["corporate", "military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "welcome_005",
+    "category": "welcome",
+    "text": "You have selected the airline with the lowest survival-rate-to-price ratio in the sector.",
+    "styles": ["budget", "absurd", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "welcome_006",
+    "category": "welcome",
+    "text": "This flight is brought to you by decisions made well above my pay grade.",
+    "styles": ["unprofessional", "exhausted"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "captainintro_001",
+    "category": "captainIntro",
+    "text": "This is your captain speaking, in the loosest possible use of the word 'captain.'",
+    "styles": ["unprofessional", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "captainintro_002",
+    "category": "captainIntro",
+    "text": "Your flight crew today is fully certified, mostly by each other.",
+    "styles": ["unprofessional", "incompetent"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "captainintro_003",
+    "category": "captainIntro",
+    "text": "This is your captain speaking from the flight deck, where everything is currently under control.",
+    "styles": ["professional", "airline"],
+    "contexts": ["any"],
+    "weight": 1,
+    "tags": ["formal"]
+  },
+  {
+    "id": "captainintro_004",
+    "category": "captainIntro",
+    "text": "Command element, this is your pilot in command.",
+    "styles": ["military", "professional"],
+    "contexts": ["any"],
+    "weight": 1,
+    "tags": ["formal"]
+  },
+  {
+    "id": "captainintro_005",
+    "category": "captainIntro",
+    "text": "Management has once again made the questionable decision to let me fly.",
+    "styles": ["unprofessional", "incompetent", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "greeting_neutral_001",
+    "category": "greeting",
+    "text": "Good day",
+    "styles": ["airline", "professional"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "pilotjoke_001",
+    "category": "pilotJoke",
+    "text": "In the event of a water landing, please remember that this is a helicopter, and that will not go well for anyone.",
+    "styles": ["deadpan", "safety", "absurd"],
+    "contexts": ["any"],
+    "weight": 2
+  },
+  {
+    "id": "pilotjoke_002",
+    "category": "pilotJoke",
+    "text": "I'd like to remind everyone that I learned to fly this thing largely through trial and error, mostly error.",
+    "styles": ["unprofessional", "incompetent"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "pilotjoke_003",
+    "category": "pilotJoke",
+    "text": "Our in-flight entertainment today consists of whatever is currently shooting at us.",
+    "styles": ["military", "deadpan", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "pilotjoke_004",
+    "category": "pilotJoke",
+    "text": "Rest assured, this aircraft has passed every inspection it was present for.",
+    "styles": ["corporate", "deadpan", "incompetent"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "pilotjoke_005",
+    "category": "pilotJoke",
+    "text": "Statistically speaking, most flights land safely, and we intend to remain statistically average.",
+    "styles": ["professional", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "passengerjoke_001",
+    "category": "passengerJoke",
+    "text": "For those of you in the back arguing about who has to jump first, management thanks you for your patience.",
+    "styles": ["unprofessional", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "passengerjoke_002",
+    "category": "passengerJoke",
+    "text": "Please keep all limbs, weapons, and regrets inside the aircraft at all times.",
+    "styles": ["military", "safety", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "passengerjoke_003",
+    "category": "passengerJoke",
+    "text": "If anyone would like to reconsider their life choices, now is the time to do it quietly.",
+    "styles": ["deadpan", "unprofessional"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "flighttime_001",
+    "category": "flightTime",
+    "text": "Our flight time today is approximately however long it takes, give or take everything.",
+    "styles": ["deadpan", "unprofessional"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "flighttime_002",
+    "category": "flightTime",
+    "text": "We are cruising at an altitude specifically chosen to annoy the least amount of people shooting at us.",
+    "styles": ["military", "absurd", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "flighttime_003",
+    "category": "flightTime",
+    "text": "Estimated time of arrival is soon, in the same way that all deadlines are technically soon.",
+    "styles": ["corporate", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "destination_001",
+    "category": "destination",
+    "text": "Our destination today is whichever landing zone currently has the least amount of gunfire.",
+    "styles": ["military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 2
+  },
+  {
+    "id": "destination_002",
+    "category": "destination",
+    "text": "We'll be providing nonstop service directly into somebody else's problem.",
+    "styles": ["deadpan", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "destination_003",
+    "category": "destination",
+    "text": "Please lower your expectations accordingly.",
+    "styles": ["deadpan", "corporate"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "destination_004",
+    "category": "destination",
+    "text": "Today's tour takes us over three separate combat zones, all included in the price of your ticket.",
+    "styles": ["tourGuide", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "destination_005",
+    "category": "destination",
+    "text": "We are en route to a landing zone that was, as of this morning, still ours.",
+    "styles": ["military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "destination_006",
+    "category": "destination",
+    "text": "Our flight plan was chosen by committee, so blame them, not me.",
+    "styles": ["corporate", "unprofessional"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "destination_007",
+    "category": "destination",
+    "text": "To your left, you'll see absolutely nothing worth looking at, and to your right, more of the same.",
+    "styles": ["tourGuide", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "safety_001",
+    "category": "safetyWarning",
+    "text": "In the unlikely event of incoming fire, please assume the brace position and reconsider your career choices.",
+    "styles": ["safety", "military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 2
+  },
+  {
+    "id": "safety_002",
+    "category": "safetyWarning",
+    "text": "Exits are located to your left, your right, and directly below you, depending on how the landing goes.",
+    "styles": ["safety", "deadpan", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "safety_003",
+    "category": "safetyWarning",
+    "text": "Please keep your harness fastened at all times, as regulations require and physics strongly recommends.",
+    "styles": ["safety", "professional"],
+    "contexts": ["any"],
+    "weight": 1,
+    "tags": ["formal"]
+  },
+  {
+    "id": "safety_004",
+    "category": "safetyWarning",
+    "text": "This aircraft is equipped with safety equipment that we have not yet located.",
+    "styles": ["safety", "incompetent", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "safety_005",
+    "category": "safetyWarning",
+    "text": "Should the cabin lose pressure, oxygen masks will drop, and we will all pretend that helps.",
+    "styles": ["safety", "deadpan", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "safety_006",
+    "category": "safetyWarning",
+    "text": "Weapons should remain safed and pointed away from the crew, who would like to remain a crew.",
+    "styles": ["safety", "military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "weatherintro_001",
+    "category": "weatherIntro",
+    "text": "Today's weather report is brought to you by whoever last looked out the window.",
+    "styles": ["weather", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "weatherintro_002",
+    "category": "weatherIntro",
+    "text": "Conditions on the ground are currently described as 'actively hostile.'",
+    "styles": ["weather", "military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "weatherintro_003",
+    "category": "weatherIntro",
+    "text": "Here is your combat weather briefing, such as it is.",
+    "styles": ["weather", "military"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "combatweather_001",
+    "category": "combatWeather",
+    "text": "Expect a chance of small arms fire with scattered explosions, clearing up by nobody knows when.",
+    "styles": ["weather", "military", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "combatweather_002",
+    "category": "combatWeather",
+    "text": "Visibility is good, which mostly just means they can see us too.",
+    "styles": ["weather", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "combatweather_003",
+    "category": "combatWeather",
+    "text": "Winds are light and variable, much like our odds of a smooth landing.",
+    "styles": ["weather", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "combatweather_004",
+    "category": "combatWeather",
+    "text": "Skies are clear, tracers are colorful, overall a pleasant evening for a firefight.",
+    "styles": ["weather", "absurd", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "landing_001",
+    "category": "landingWarning",
+    "text": "Please prepare for what management continues to describe as a landing.",
+    "styles": ["landing", "incompetent", "deadpan"],
+    "contexts": ["any"],
+    "weight": 2
+  },
+  {
+    "id": "landing_002",
+    "category": "landingWarning",
+    "text": "We are beginning our descent, in the sense that we are going down.",
+    "styles": ["landing", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "landing_003",
+    "category": "landingWarning",
+    "text": "Brace for impact is a strong phrase, let's just say brace for arrival.",
+    "styles": ["landing", "deadpan", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "landing_004",
+    "category": "landingWarning",
+    "text": "Touchdown is imminent, assuming the landing zone is still where we left it.",
+    "styles": ["landing", "military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "landing_005",
+    "category": "landingWarning",
+    "text": "We will be landing shortly, hot, and probably sideways.",
+    "styles": ["landing", "military", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "takeoff_001",
+    "category": "takeoffLine",
+    "text": "Wheels up, and there is officially no turning back now.",
+    "styles": ["takeoff", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "takeoff_002",
+    "category": "takeoffLine",
+    "text": "We are cleared for departure, which is more than can be said for our return.",
+    "styles": ["takeoff", "military", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "closing_001",
+    "category": "closing",
+    "text": "Thank you for flying with us, and good luck out there.",
+    "styles": ["airline", "deadpan"],
+    "contexts": ["any"],
+    "weight": 2
+  },
+  {
+    "id": "closing_002",
+    "category": "closing",
+    "text": "On behalf of the crew, please exit quickly, quietly, and preferably alive.",
+    "styles": ["military", "deadpan", "safety"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "closing_003",
+    "category": "closing",
+    "text": "We know you have a choice of helicopters, and we appreciate you making a poor one.",
+    "styles": ["budget", "deadpan", "unprofessional"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "closing_004",
+    "category": "closing",
+    "text": "This concludes today's announcement. Any resemblance to a real flight briefing is purely coincidental.",
+    "styles": ["legal", "corporate", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "closing_005",
+    "category": "closing",
+    "text": "That's all from the flight deck. Try not to die out there.",
+    "styles": ["unprofessional", "deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+  {
+    "id": "closing_006",
+    "category": "closing",
+    "text": "Once again, thank you for choosing us, mostly because you didn't have another option.",
+    "styles": ["corporate", "deadpan", "absurd"],
+    "contexts": ["any"],
+    "weight": 1
+  },
+{
+    "id": "greeting_morning_001",
+    "category": "greeting",
+    "text": "Good morning",
+    "styles": ["airline"],
+    "contexts": ["morning"],
+    "weight": 1
+  },
+  {
+    "id": "greeting_afternoon_001",
+    "category": "greeting",
+    "text": "Good afternoon",
+    "styles": ["airline"],
+    "contexts": ["afternoon"],
+    "weight": 1
+  },
+  {
+    "id": "greeting_evening_001",
+    "category": "greeting",
+    "text": "Good evening",
+    "styles": ["airline"],
+    "contexts": ["evening"],
+    "weight": 1
+  },
+  {
+    "id": "greeting_night_001",
+    "category": "greeting",
+    "text": "Good... whatever this hour is",
+    "styles": ["unprofessional", "deadpan"],
+    "contexts": ["night", "lateNight"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_morning_001",
+    "category": "timeComment",
+    "text": "The sun is up, the rotors are spinning, and somehow we're doing this again.",
+    "styles": ["deadpan", "exhausted"],
+    "contexts": ["morning"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_lunch_001",
+    "category": "timeComment",
+    "text": "Today's in-flight meal consists of ammunition and poor decisions.",
+    "styles": ["deadpan", "absurd"],
+    "contexts": ["lunch"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_fridaynight_001",
+    "category": "timeComment",
+    "text": "Happy Friday night, passengers. Apparently this is what we're doing with our weekend.",
+    "styles": ["deadpan", "unprofessional"],
+    "contexts": ["fridayNight"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_aftermidnight_001",
+    "category": "timeComment",
+    "text": "To everyone still awake at this hour: clearly none of us make responsible decisions.",
+    "styles": ["unprofessional", "deadpan"],
+    "contexts": ["afterMidnight"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_2am_001",
+    "category": "timeComment",
+    "text": "Good evening. Or good morning. I don't know anymore.",
+    "styles": ["exhausted", "deadpan"],
+    "contexts": ["middleOfNight", "lateNight"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_mondaymorning_001",
+    "category": "timeComment",
+    "text": "Good morning and happy Monday. As if your day wasn't already bad enough, I'm your pilot.",
+    "styles": ["deadpan", "unprofessional"],
+    "contexts": ["mondayMorning"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_weekend_001",
+    "category": "timeComment",
+    "text": "It's the weekend, which explains why none of us have better plans than this.",
+    "styles": ["deadpan", "unprofessional"],
+    "contexts": ["weekend"],
+    "weight": 1
+  },
+  {
+    "id": "timecomment_neutral_001",
+    "category": "timeComment",
+    "text": "Please enjoy the flight, or at least endure it.",
+    "styles": ["deadpan"],
+    "contexts": ["any"],
+    "weight": 1
+  }
+  ]
+}
