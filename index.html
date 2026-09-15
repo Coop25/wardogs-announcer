@@ -22,7 +22,7 @@
       <div class="section-label">CURRENT ANNOUNCEMENT</div>
       <div class="announcement-card">
         <div id="teamBadge" class="team-badge" hidden>TEAM: &mdash;</div>
-        <p id="announcementText" class="announcement-text">Loading phrase library&hellip;</p>
+        <p id="announcementText" class="announcement-text">Loading announcements&hellip;</p>
       </div>
 
       <div class="next-block">
@@ -42,10 +42,7 @@
       </div>
 
       <div id="debugInfo" class="debug-info" hidden>
-        <span id="debugTemplate"></span>
-        <span id="debugLength"></span>
-        <span id="debugTimeAware"></span>
-        <span id="debugSignature"></span>
+        <span id="debugLine"></span>
       </div>
     </main>
 
@@ -61,7 +58,7 @@
     <footer class="status-bar">
       <span id="statusGenerated">Generated this session: 0</span>
       <span id="statusHistory">Recent history: 0/30</span>
-      <span id="statusContext">Current context: &mdash;</span>
+      <span id="statusLibrary">Library size: &mdash;</span>
       <span id="statusNext">Next announcement: 04:00</span>
     </footer>
 
@@ -82,38 +79,14 @@
           <select id="settingHistorySize"></select>
         </label>
 
-        <fieldset class="field-group">
-          <legend>Length probabilities (%)</legend>
-          <label class="field-inline">Short <input id="settingLengthShort" type="number" min="0" max="100" /></label>
-          <label class="field-inline">Medium <input id="settingLengthMedium" type="number" min="0" max="100" /></label>
-          <label class="field-inline">Long <input id="settingLengthLong" type="number" min="0" max="100" /></label>
-        </fieldset>
-
-        <label class="field-inline">
-          <input id="settingTimeAwareEnabled" type="checkbox" />
-          Time-aware announcements enabled
-        </label>
-
-        <label class="field">
-          Time-aware probability (%)
-          <input id="settingTimeAwareProbability" type="number" min="0" max="100" />
-        </label>
-
-        <fieldset class="field-group">
-          <legend>Humor styles</legend>
-          <div id="settingStylesContainer" class="styles-grid"></div>
-        </fieldset>
-
         <button id="btnResetSettings" class="btn btn-danger">Reset to Defaults</button>
       </div>
     </aside>
   </div>
 
   <script src="data/bundle.js"></script>
-  <script src="js/timeContext.js"></script>
-  <script src="js/dataLoader.js"></script>
+  <script src="js/lines.js"></script>
   <script src="js/history.js"></script>
-  <script src="js/generator.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

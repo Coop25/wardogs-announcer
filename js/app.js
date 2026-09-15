@@ -1,35 +1,28 @@
 /**
  * app.js
  * Wires the UI: timer/rotation, buttons, settings panel, status bar,
- * and the debug/test entry point. Contains no announcement content.
+ * share links, and the team picker. Contains no announcement content —
+ * that all lives in data/announcements.txt.
  */
 (function () {
   'use strict';
 
   const DEFAULT_SETTINGS = {
     rotationSeconds: 240,
-    historySize: 30,
-    lengthProbabilities: { short: 0.25, medium: 0.55, long: 0.2 },
-    timeAwareEnabled: true,
-    timeAwareProbability: 0.25,
-    enabledStyles: {},
-    maxRerollAttempts: 50
+    historySize: 30
   };
   const SETTINGS_KEY = 'wardogs_settings_v1';
   const HISTORY_SIZE_OPTIONS = [30, 50, 100, 250, 500];
-
-  const els = {};
-  let dataset = null;
-  let settings = loadSettings();
-  let historyManager = null;
-
   const SHARE_PARAM = 'say';
   const TEAMS = ['green', 'blue', 'red'];
 
+  const els = {};
+  let lines = [];
+  let settings = loadSettings();
+  let historyManager = null;
+
   let sessionGenerated = 0;
-  let current = null; // last generate() result
-  let currentAnnouncementText = ''; // whatever text is currently on screen, generated or shared
-  let currentShareCode = ''; // compact "templateId~id,id,id" code for whatever's on screen
+  let currentAnnouncementText = ''; // whatever's currently on screen
   let remainingSeconds = settings.rotationSeconds;
   let totalSeconds = settings.rotationSeconds;
   let timerId = null;
@@ -38,25 +31,13 @@
   function loadSettings() {
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
-      if (!raw) return structuredCloneSettings(DEFAULT_SETTINGS);
+      if (!raw) return { ...DEFAULT_SETTINGS };
       const parsed = JSON.parse(raw);
-      return {
-        ...structuredCloneSettings(DEFAULT_SETTINGS),
-        ...parsed,
-        lengthProbabilities: {
-          ...DEFAULT_SETTINGS.lengthProbabilities,
-          ...(parsed.lengthProbabilities || {})
-        },
-        enabledStyles: { ...(parsed.enabledStyles || {}) }
-      };
+      return { ...DEFAULT_SETTINGS, ...parsed };
     } catch (e) {
       console.warn('[WARDOGS] Could not load settings, using defaults.', e);
-      return structuredCloneSettings(DEFAULT_SETTINGS);
+      return { ...DEFAULT_SETTINGS };
     }
-  }
-
-  function structuredCloneSettings(s) {
-    return JSON.parse(JSON.stringify(s));
   }
 
   function saveSettings() {
@@ -76,60 +57,39 @@
 
   function cacheEls() {
     [
-      'announcementText', 'countdown', 'progressFill',
+      'announcementText', 'countdown', 'progressFill', 'teamBadge',
       'btnNext', 'btnPause', 'btnResume', 'btnRestart', 'btnShare',
-      'statusGenerated', 'statusHistory', 'statusContext', 'statusNext',
-      'btnSettingsToggle', 'btnDebugToggle', 'settingsPanel', 'debugInfo',
-      'debugTemplate', 'debugLength', 'debugTimeAware', 'debugSignature',
+      'statusGenerated', 'statusHistory', 'statusLibrary', 'statusNext',
+      'btnSettingsToggle', 'btnDebugToggle', 'settingsPanel', 'debugInfo', 'debugLine',
       'settingRotationMinutes', 'settingHistorySize',
-      'settingLengthShort', 'settingLengthMedium', 'settingLengthLong',
-      'settingTimeAwareEnabled', 'settingTimeAwareProbability',
-      'settingStylesContainer', 'btnResetSettings', 'btnCloseSettings',
-      'loadError', 'teamBadge',
+      'btnResetSettings', 'btnCloseSettings',
+      'loadError',
       'shareToast', 'shareLinkInput', 'shareStatus', 'btnCopyShareLink', 'btnCloseShareToast'
     ].forEach((id) => {
       els[id] = document.getElementById(id);
     });
   }
 
-  function generateAndDisplay(reason) {
-    try {
-      current = window.WardogsGenerator.generate(dataset, settings, historyManager);
-    } catch (e) {
-      console.error('[WARDOGS] Generation failed:', e);
-      els.announcementText.textContent = 'Announcement generator error — see console.';
-      return;
-    }
-    sessionGenerated++;
-    currentAnnouncementText = current.text;
-    currentShareCode = window.WardogsGenerator.buildShareCode(current.template.id, current.usedPhrases);
-
-    renderAnnouncementText(current.text);
-
-    els.statusGenerated.textContent = `Generated this session: ${sessionGenerated}`;
-    els.statusHistory.textContent = `Recent history: ${historyManager.size}/${historyManager.maxSize}`;
-    els.statusContext.textContent = `Current context: ${current.ctx.dayOfWeek} ${current.ctx.timePeriodLabel}`;
-
-    els.debugTemplate.textContent = `Template: ${current.template.id}`;
-    els.debugLength.textContent = `Length: ${current.length}`;
-    els.debugTimeAware.textContent = `Time-aware: ${current.useTimeAware ? 'yes' : 'no'}`;
-    els.debugSignature.textContent = `Signature: ${current.signature}`;
-
-    if (current.rerollCount > 0) {
-      console.info(`[WARDOGS] Rerolled ${current.rerollCount} time(s) to avoid repeating recent history.`);
-    }
-    if (current.unresolved.length) {
-      console.warn(`[WARDOGS] Unresolved placeholders in generated announcement:`, current.unresolved);
-    }
+  function showNextAnnouncement() {
+    const text = window.WardogsLines.pickNext(lines, historyManager);
+    display(text);
   }
 
-  function renderAnnouncementText(text) {
+  function display(text) {
+    currentAnnouncementText = text;
+    sessionGenerated++;
+
     els.announcementText.classList.remove('fade-in');
     // Force reflow so the transition re-triggers on repeated generations.
     void els.announcementText.offsetWidth;
     els.announcementText.textContent = text;
     els.announcementText.classList.add('fade-in');
     rollTeam();
+
+    els.statusGenerated.textContent = `Generated this session: ${sessionGenerated}`;
+    els.statusHistory.textContent = `Recent history: ${historyManager.size}/${historyManager.maxSize}`;
+    const index = lines.indexOf(text);
+    els.debugLine.textContent = index >= 0 ? `Announcement #${index + 1} of ${lines.length}` : 'Shared announcement (not in the current list)';
   }
 
   /** Randomly (re-)assign a team, in sync with every new announcement shown. */
@@ -138,36 +98,6 @@
     els.teamBadge.textContent = `TEAM: ${team.toUpperCase()}`;
     els.teamBadge.className = `team-badge team-${team}`;
     els.teamBadge.hidden = false;
-  }
-
-  /**
-   * Reconstruct and show the exact announcement a share code points to
-   * (templateId + ordered phrase ids), bypassing random generation.
-   */
-  function displaySharedFromCode(code) {
-    const { templateId, ids } = window.WardogsGenerator.parseShareCode(code);
-    const ctx = window.WardogsTimeContext.getTimeContext();
-    const result = window.WardogsGenerator.renderFromIds(templateId, ids, dataset, ctx);
-
-    if (!result.ok) {
-      // A missing template/phrase (content edited or removed since the link
-      // was shared) would otherwise render a mangled, half-empty sentence —
-      // better to fall back to a normal fresh announcement than show that.
-      console.warn('[WARDOGS] Share link could not be fully reconstructed (content may have changed since it was shared). Falling back to a fresh announcement.', result);
-      generateAndDisplay('shared-link-fallback');
-      return;
-    }
-
-    current = null;
-    currentAnnouncementText = result.text;
-    currentShareCode = code;
-    renderAnnouncementText(result.text);
-
-    els.statusContext.textContent = 'Current context: shared announcement';
-    els.debugTemplate.textContent = `Shared announcement: ${templateId}`;
-    els.debugLength.textContent = '';
-    els.debugTimeAware.textContent = '';
-    els.debugSignature.textContent = '';
   }
 
   function resetTimer() {
@@ -186,7 +116,7 @@
   function tick() {
     remainingSeconds -= 1;
     if (remainingSeconds <= 0) {
-      generateAndDisplay('rotation');
+      showNextAnnouncement();
       resetTimer();
     } else {
       updateTimerDisplay();
@@ -227,24 +157,24 @@
   }
 
   function nextAnnouncement() {
-    generateAndDisplay('manual');
+    showNextAnnouncement();
     resetTimer();
     if (!paused) startTimer();
   }
 
   // ---------- Share links ----------
 
-  function buildShareUrl(code) {
+  function buildShareUrl(text) {
     const url = new URL(window.location.href);
     url.search = '';
     url.hash = '';
-    url.searchParams.set(SHARE_PARAM, code);
+    url.searchParams.set(SHARE_PARAM, text);
     return url.toString();
   }
 
   async function shareCurrentAnnouncement() {
-    if (!currentShareCode) return;
-    const url = buildShareUrl(currentShareCode);
+    if (!currentAnnouncementText) return;
+    const url = buildShareUrl(currentAnnouncementText);
 
     // Show + select the link first so the execCommand fallback below has a
     // visible, focused field to copy from if the async Clipboard API fails.
@@ -292,22 +222,6 @@
     els.settingHistorySize.innerHTML = HISTORY_SIZE_OPTIONS.map(
       (n) => `<option value="${n}" ${n === settings.historySize ? 'selected' : ''}>${n}</option>`
     ).join('');
-    els.settingLengthShort.value = Math.round(settings.lengthProbabilities.short * 100);
-    els.settingLengthMedium.value = Math.round(settings.lengthProbabilities.medium * 100);
-    els.settingLengthLong.value = Math.round(settings.lengthProbabilities.long * 100);
-    els.settingTimeAwareEnabled.checked = !!settings.timeAwareEnabled;
-    els.settingTimeAwareProbability.value = Math.round(settings.timeAwareProbability * 100);
-
-    const styles = Array.from(dataset.styles).sort();
-    els.settingStylesContainer.innerHTML = styles
-      .map((style) => {
-        const enabled = settings.enabledStyles[style] !== false;
-        return `<label class="style-toggle">
-          <input type="checkbox" data-style="${style}" ${enabled ? 'checked' : ''} />
-          ${style}
-        </label>`;
-      })
-      .join('');
   }
 
   function applySettingsFromForm() {
@@ -317,19 +231,6 @@
 
     settings.historySize = parseInt(els.settingHistorySize.value, 10) || DEFAULT_SETTINGS.historySize;
     historyManager.setMaxSize(settings.historySize);
-
-    const s = parseFloat(els.settingLengthShort.value) || 0;
-    const m = parseFloat(els.settingLengthMedium.value) || 0;
-    const l = parseFloat(els.settingLengthLong.value) || 0;
-    const total = s + m + l || 1;
-    settings.lengthProbabilities = { short: s / total, medium: m / total, long: l / total };
-
-    settings.timeAwareEnabled = els.settingTimeAwareEnabled.checked;
-    settings.timeAwareProbability = Math.min(100, Math.max(0, parseFloat(els.settingTimeAwareProbability.value) || 0)) / 100;
-
-    els.settingStylesContainer.querySelectorAll('input[data-style]').forEach((cb) => {
-      settings.enabledStyles[cb.dataset.style] = cb.checked;
-    });
 
     saveSettings();
     els.statusHistory.textContent = `Recent history: ${historyManager.size}/${historyManager.maxSize}`;
@@ -342,7 +243,7 @@
   }
 
   function resetSettings() {
-    settings = structuredCloneSettings(DEFAULT_SETTINGS);
+    settings = { ...DEFAULT_SETTINGS };
     saveSettings();
     historyManager.setMaxSize(settings.historySize);
     populateSettingsForm();
@@ -375,51 +276,72 @@
     });
     els.btnResetSettings.addEventListener('click', resetSettings);
 
-    const formInputs = [
-      els.settingRotationMinutes, els.settingHistorySize,
-      els.settingLengthShort, els.settingLengthMedium, els.settingLengthLong,
-      els.settingTimeAwareEnabled, els.settingTimeAwareProbability
-    ];
-    formInputs.forEach((el) => el.addEventListener('change', applySettingsFromForm));
-    els.settingStylesContainer.addEventListener('change', applySettingsFromForm);
+    [els.settingRotationMinutes, els.settingHistorySize].forEach((el) =>
+      el.addEventListener('change', applySettingsFromForm)
+    );
+  }
+
+  /** Quick console diagnostic: simulate N draws and report repeat behavior. */
+  function testAntiRepeat(count) {
+    const windowArr = [];
+    const boundedHistory = {
+      has: (s) => windowArr.includes(s),
+      add: (s) => {
+        windowArr.push(s);
+        while (windowArr.length > settings.historySize) windowArr.shift();
+      }
+    };
+    const seen = new Set();
+    let immediateRepeats = 0;
+    let last = null;
+    for (let i = 0; i < count; i++) {
+      const line = window.WardogsLines.pickNext(lines, boundedHistory);
+      if (line === last) immediateRepeats++;
+      seen.add(line);
+      last = line;
+    }
+    const stats = { draws: count, totalLines: lines.length, uniqueSeen: seen.size, immediateRepeats };
+    console.log('[WARDOGS testAntiRepeat]', stats);
+    return stats;
   }
 
   async function init() {
     cacheEls();
     try {
-      dataset = await window.WardogsDataLoader.load();
+      lines = await window.WardogsLines.load();
     } catch (e) {
-      console.error('[WARDOGS] Failed to load phrase library:', e);
+      console.error('[WARDOGS] Failed to load announcements:', e);
       els.loadError.hidden = false;
       els.loadError.textContent =
-        'Could not load the phrase library. If you opened this file directly (file://), ' +
+        'Could not load the announcement list. If you opened this file directly (file://), ' +
         'make sure data/bundle.js exists (run build.js) or serve the folder with a local static server.';
       return;
     }
 
     historyManager = new window.WardogsHistory.HistoryManager(settings.historySize);
+    els.statusLibrary.textContent = `Library size: ${lines.length}`;
 
     populateSettingsForm();
     wireEvents();
 
     const params = new URLSearchParams(window.location.search);
-    const shareCode = params.get(SHARE_PARAM);
+    const sharedText = params.get(SHARE_PARAM);
 
     resetTimer();
-    if (shareCode) {
+    if (sharedText) {
       // Strip the param immediately so a reload later starts a normal
       // rotation instead of re-showing the same shared line forever.
       window.history.replaceState({}, '', window.location.pathname + window.location.hash);
-      displaySharedFromCode(shareCode);
+      display(sharedText);
       pause(); // keep the shared line on screen until the user moves on
     } else {
-      generateAndDisplay('init');
+      showNextAnnouncement();
       startTimer();
     }
 
-    window.testGenerator = (count) => window.WardogsGenerator.testGenerator(count || 1000, dataset, settings);
-    window.WARDOGS_APP = { get dataset() { return dataset; }, get settings() { return settings; }, get historyManager() { return historyManager; } };
-    console.info('[WARDOGS] Ready. Try testGenerator(10000) in the console for a stress test.');
+    window.testAntiRepeat = (count) => testAntiRepeat(count || 1000);
+    window.WARDOGS_APP = { get lines() { return lines; }, get settings() { return settings; }, get historyManager() { return historyManager; } };
+    console.info('[WARDOGS] Ready. Try testAntiRepeat(1000) in the console to sanity-check repeat behavior.');
   }
 
   document.addEventListener('DOMContentLoaded', init);
