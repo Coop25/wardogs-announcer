@@ -24,6 +24,7 @@
   let historyManager = null;
 
   const SHARE_PARAM = 'say';
+  const TEAMS = ['green', 'blue', 'red'];
 
   let sessionGenerated = 0;
   let current = null; // last generate() result
@@ -84,7 +85,7 @@
       'settingLengthShort', 'settingLengthMedium', 'settingLengthLong',
       'settingTimeAwareEnabled', 'settingTimeAwareProbability',
       'settingStylesContainer', 'btnResetSettings', 'btnCloseSettings',
-      'loadError',
+      'loadError', 'teamBadge',
       'shareToast', 'shareLinkInput', 'shareStatus', 'btnCopyShareLink', 'btnCloseShareToast'
     ].forEach((id) => {
       els[id] = document.getElementById(id);
@@ -128,6 +129,15 @@
     void els.announcementText.offsetWidth;
     els.announcementText.textContent = text;
     els.announcementText.classList.add('fade-in');
+    rollTeam();
+  }
+
+  /** Randomly (re-)assign a team, in sync with every new announcement shown. */
+  function rollTeam() {
+    const team = TEAMS[Math.floor(Math.random() * TEAMS.length)];
+    els.teamBadge.textContent = `TEAM: ${team.toUpperCase()}`;
+    els.teamBadge.className = `team-badge team-${team}`;
+    els.teamBadge.hidden = false;
   }
 
   /**

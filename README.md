@@ -218,6 +218,13 @@ missing fields, empty text, bad weights/contexts, and templates that
 reference an unknown category are all logged as console warnings, and the
 offending entry is skipped rather than crashing the app.
 
+## Team picker
+
+A colored TEAM: GREEN / BLUE / RED badge sits above the announcement text
+and rerolls at random every time a new announcement is shown — on
+rotation, on NEXT, and when opening a share link. It's an independent
+coin-flip each time (no anti-repeat), purely client-side.
+
 ## Sharing a specific announcement
 
 Hit **SHARE** below the controls to copy a link to whatever announcement is
