@@ -23,8 +23,11 @@
   let settings = loadSettings();
   let historyManager = null;
 
+  const SHARE_PARAM = 'say';
+
   let sessionGenerated = 0;
   let current = null; // last generate() result
+  let currentAnnouncementText = ''; // whatever text is currently on screen, generated or shared
   let remainingSeconds = settings.rotationSeconds;
   let totalSeconds = settings.rotationSeconds;
   let timerId = null;
@@ -72,7 +75,7 @@
   function cacheEls() {
     [
       'announcementText', 'countdown', 'progressFill',
-      'btnNext', 'btnPause', 'btnResume', 'btnRestart',
+      'btnNext', 'btnPause', 'btnResume', 'btnRestart', 'btnShare',
       'statusGenerated', 'statusHistory', 'statusContext', 'statusNext',
       'btnSettingsToggle', 'btnDebugToggle', 'settingsPanel', 'debugInfo',
       'debugTemplate', 'debugLength', 'debugTimeAware', 'debugSignature',
@@ -80,7 +83,8 @@
       'settingLengthShort', 'settingLengthMedium', 'settingLengthLong',
       'settingTimeAwareEnabled', 'settingTimeAwareProbability',
       'settingStylesContainer', 'btnResetSettings', 'btnCloseSettings',
-      'loadError'
+      'loadError',
+      'shareToast', 'shareLinkInput', 'shareStatus', 'btnCopyShareLink', 'btnCloseShareToast'
     ].forEach((id) => {
       els[id] = document.getElementById(id);
     });
@@ -95,12 +99,9 @@
       return;
     }
     sessionGenerated++;
+    currentAnnouncementText = current.text;
 
-    els.announcementText.classList.remove('fade-in');
-    // Force reflow so the transition re-triggers on repeated generations.
-    void els.announcementText.offsetWidth;
-    els.announcementText.textContent = current.text;
-    els.announcementText.classList.add('fade-in');
+    renderAnnouncementText(current.text);
 
     els.statusGenerated.textContent = `Generated this session: ${sessionGenerated}`;
     els.statusHistory.textContent = `Recent history: ${historyManager.size}/${historyManager.maxSize}`;
@@ -117,6 +118,27 @@
     if (current.unresolved.length) {
       console.warn(`[WARDOGS] Unresolved placeholders in generated announcement:`, current.unresolved);
     }
+  }
+
+  function renderAnnouncementText(text) {
+    els.announcementText.classList.remove('fade-in');
+    // Force reflow so the transition re-triggers on repeated generations.
+    void els.announcementText.offsetWidth;
+    els.announcementText.textContent = text;
+    els.announcementText.classList.add('fade-in');
+  }
+
+  /** Show a specific announcement text that came in via a share link, bypassing the generator. */
+  function displaySharedAnnouncement(text) {
+    current = null;
+    currentAnnouncementText = text;
+    renderAnnouncementText(text);
+
+    els.statusContext.textContent = 'Current context: shared announcement';
+    els.debugTemplate.textContent = 'Shared announcement (opened from a share link)';
+    els.debugLength.textContent = '';
+    els.debugTimeAware.textContent = '';
+    els.debugSignature.textContent = '';
   }
 
   function resetTimer() {
@@ -179,6 +201,59 @@
     generateAndDisplay('manual');
     resetTimer();
     if (!paused) startTimer();
+  }
+
+  // ---------- Share links ----------
+
+  function buildShareUrl(text) {
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    url.searchParams.set(SHARE_PARAM, text);
+    return url.toString();
+  }
+
+  async function shareCurrentAnnouncement() {
+    if (!currentAnnouncementText) return;
+    const url = buildShareUrl(currentAnnouncementText);
+
+    // Show + select the link first so the execCommand fallback below has a
+    // visible, focused field to copy from if the async Clipboard API fails.
+    els.shareLinkInput.value = url;
+    els.shareStatus.textContent = '';
+    els.shareToast.hidden = false;
+    els.shareLinkInput.focus();
+    els.shareLinkInput.select();
+
+    const copied = await tryCopyToClipboard(url);
+    setShareStatus(copied);
+  }
+
+  function setShareStatus(copied) {
+    els.shareStatus.textContent = copied
+      ? 'Link copied to clipboard!'
+      : 'Could not copy automatically — the link is selected, press Ctrl+C.';
+  }
+
+  async function tryCopyToClipboard(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (e) {
+      // fall through to the legacy fallback below
+    }
+    try {
+      els.shareLinkInput.select();
+      return document.execCommand('copy');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function hideShareToast() {
+    els.shareToast.hidden = true;
   }
 
   // ---------- Settings panel ----------
@@ -251,6 +326,14 @@
     els.btnPause.addEventListener('click', pause);
     els.btnResume.addEventListener('click', resume);
     els.btnRestart.addEventListener('click', restart);
+    els.btnShare.addEventListener('click', shareCurrentAnnouncement);
+    els.btnCopyShareLink.addEventListener('click', async () => {
+      els.shareLinkInput.select();
+      const copied = await tryCopyToClipboard(els.shareLinkInput.value);
+      setShareStatus(copied);
+      els.shareLinkInput.select();
+    });
+    els.btnCloseShareToast.addEventListener('click', hideShareToast);
 
     els.btnSettingsToggle.addEventListener('click', () => {
       els.settingsPanel.hidden = !els.settingsPanel.hidden;
@@ -290,9 +373,20 @@
     populateSettingsForm();
     wireEvents();
 
-    generateAndDisplay('init');
+    const params = new URLSearchParams(window.location.search);
+    const sharedText = params.get(SHARE_PARAM);
+
     resetTimer();
-    startTimer();
+    if (sharedText) {
+      // Strip the param immediately so a reload later starts a normal
+      // rotation instead of re-showing the same shared line forever.
+      window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+      displaySharedAnnouncement(sharedText);
+      pause(); // keep the shared line on screen until the user moves on
+    } else {
+      generateAndDisplay('init');
+      startTimer();
+    }
 
     window.testGenerator = (count) => window.WardogsGenerator.testGenerator(count || 1000, dataset, settings);
     window.WARDOGS_APP = { get dataset() { return dataset; }, get settings() { return settings; }, get historyManager() { return historyManager; } };

@@ -218,6 +218,18 @@ missing fields, empty text, bad weights/contexts, and templates that
 reference an unknown category are all logged as console warnings, and the
 offending entry is skipped rather than crashing the app.
 
+## Sharing a specific announcement
+
+Hit **SHARE** below the controls to copy a link to whatever announcement is
+currently on screen. The exact text is embedded in the URL itself (e.g.
+`?say=...`) — there's no server or database involved, so it works the same
+whether you're running locally or on GitHub Pages.
+
+Opening a share link shows that exact line immediately, paused (so it won't
+get replaced by the timer), with the link stripped from the address bar
+right away. Hit **RESUME** to fold back into the normal rotation, or
+**NEXT** to jump straight to a fresh random one.
+
 ## Settings
 
 Gear icon (top right) opens a panel for: rotation interval, history size,

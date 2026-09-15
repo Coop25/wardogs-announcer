@@ -37,6 +37,7 @@
         <button id="btnPause" class="btn">PAUSE</button>
         <button id="btnResume" class="btn" disabled>RESUME</button>
         <button id="btnRestart" class="btn">RESTART</button>
+        <button id="btnShare" class="btn" title="Copy a link to this exact announcement">SHARE</button>
       </div>
 
       <div id="debugInfo" class="debug-info" hidden>
@@ -46,6 +47,15 @@
         <span id="debugSignature"></span>
       </div>
     </main>
+
+    <div id="shareToast" class="share-toast" hidden>
+      <div class="share-toast-row">
+        <input id="shareLinkInput" class="share-link-input" type="text" readonly />
+        <button id="btnCopyShareLink" class="btn btn-primary">COPY</button>
+        <button id="btnCloseShareToast" class="btn btn-ghost">&times;</button>
+      </div>
+      <div id="shareStatus" class="share-status"></div>
+    </div>
 
     <footer class="status-bar">
       <span id="statusGenerated">Generated this session: 0</span>
